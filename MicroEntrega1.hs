@@ -1,34 +1,33 @@
 module MicroEntrega1 where
-data Microprocesador = Microprocesador {mem :: [Int], acumA :: Int, acumB :: Int, pC :: Int, mensaje :: String} deriving Show
+data Microprocesador = Microprocesador {memoria :: [Int], acumuladorA :: Int, acumuladorB :: Int, programCounter :: Int, mensajeError :: String} deriving Show
 
-xt8088 = Microprocesador{mem=[], acumA=0,acumB=0,pC=0,mensaje=" "}
+xt8088 = Microprocesador{memoria=(replicate 1024 0), acumuladorA=0,acumuladorB=0,programCounter=0,mensajeError=" "}
 
 nop :: Microprocesador -> Microprocesador
 nop = sumarPC
 
 add :: Microprocesador -> Microprocesador
-add micro = sumarPC micro {acumA = acumA micro + acumB micro, acumB = 0}
+add micro = sumarPC micro {acumuladorA = acumuladorA micro + acumuladorB micro, acumuladorB = 0}
 
 divide :: Microprocesador -> Microprocesador
 divide micro 
-            |acumB micro == 0 = sumarPC micro {mensaje = "DIVISION BY ZERO"}
-            |otherwise = sumarPC micro {acumA = div (acumA micro) (acumB micro), acumB = 0}
+            |acumuladorB micro == 0 = sumarPC micro {mensajeError = "DIVISION BY ZERO"}
+            |otherwise = sumarPC micro {acumuladorA = div (acumuladorA micro) (acumuladorB micro), acumuladorB = 0}
 
 swap :: Microprocesador -> Microprocesador
-swap micro = sumarPC micro {acumA = acumB micro, acumB = acumA micro} 
+swap micro = sumarPC micro {acumuladorA = acumuladorB micro, acumuladorB = acumuladorA micro}
 
 lod :: Int -> Microprocesador -> Microprocesador
-lod addr micro = sumarPC micro {acumA = (!!) (mem micro) (addr - 1)}
+lod addr micro = sumarPC micro {acumuladorA = (!!) (memoria micro) (addr - 1)}
 
 str :: Int -> Int -> Microprocesador -> Microprocesador 
-str addr val micro = sumarPC micro {mem = (take (addr - 1) (mem micro)) ++ [val] ++ (drop addr (mem micro)) }
+str addr val micro = sumarPC micro {memoria = (take (addr - 1) (memoria micro)) ++ [val] ++ (drop addr (memoria micro)) }
 
 lodv :: Int -> Microprocesador -> Microprocesador
-lodv val micro = sumarPC micro {acumA = val}
+lodv val micro = sumarPC micro {acumuladorA = val}
 
 sumarPC :: Microprocesador -> Microprocesador
-sumarPC micro = micro {pC = pC micro +1}
-
+sumarPC micro = micro {programCounter = programCounter micro + 1}
 
 -- 3.3.2 -> (show.add.(lodv 22).swap.(lodv 10)) xt8088
 
@@ -38,23 +37,6 @@ sumarPC micro = micro {pC = pC micro +1}
 
 -- 4.3 -> (show.divide.(lodv 12).swap.(lodv 4)) xt8088
 
+fp20 = Microprocesador{memoria=[], acumuladorA=7,acumuladorB=24,programCounter=0,mensajeError=" "}
 
-f20 = Microprocesador{mem=[], acumA=7,acumB=24,pC=0,mensaje=" "}
-
-at8086 = Microprocesador{mem=[1..20], acumA=0,acumB=0,pC=0,mensaje=" "}
-
-programCounter :: Microprocesador -> Int
-programCounter micro = pC micro
-
-
-acumuladorA :: Microprocesador -> Int
-acumuladorA micro = acumA micro
-
-acumuladorB :: Microprocesador -> Int
-acumuladorB micro = acumB micro
-
-memoria :: Microprocesador -> [Int]
-memoria micro = mem micro
-
-mensajeError :: Microprocesador -> String
-mensajeError micro = mensaje micro
+at8086 = Microprocesador{memoria=[1..20], acumuladorA=0,acumuladorB=0,programCounter=0,mensajeError=" "}
